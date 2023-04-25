@@ -17,7 +17,7 @@ class Frontier(object):
             # Save file does not exist, but request to load save.
             self.logger.info(
                 f"Did not find save file {self.config.save_file}, "
-                f"starting from seed.")
+                f"starting from seed.") 
         elif os.path.exists(self.config.save_file) and restart:
             # Save file does exists, but request to start from seed.
             self.logger.info(
@@ -36,11 +36,17 @@ class Frontier(object):
                     self.add_url(url)
 
     def _parse_save_file(self):
+
         ''' This function can be overridden for alternate saving techniques. '''
+        # return
+        # parsing the save
+
         total_count = len(self.save)
+
         tbd_count = 0
         for url, completed in self.save.values():
-            if not completed and is_valid(url):
+            if is_valid(url):
+            # if not completed and is_valid(url):
                 self.to_be_downloaded.append(url)
                 tbd_count += 1
         self.logger.info(

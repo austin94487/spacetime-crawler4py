@@ -1,5 +1,6 @@
 import re
 from urllib.parse import urlparse
+from bs4 import BeautifulSoup
 
 # The scraper function receives a URL and corresponding Web response 
 # (for example, the first one will be "http://www.ics.uci.edu" and 
@@ -15,9 +16,14 @@ from urllib.parse import urlparse
 
 def scraper(url, response):
     links = extract_next_links(url, response)
-    return [link for link in links if is_valid(link)]
+    url_list = [link for link in links if is_valid(link)]
+    # print(url_list)
+    return url_list
+
 
 def extract_next_links(url, response):
+
+
     # Implementation required.
     # url: the URL that was used to get the page
     # response.url: the actual url of the page
@@ -28,33 +34,79 @@ def extract_next_links(url, response):
     #         response.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from response.raw_response.content
 
-    '''
-    An example of printing the text on a given URL, with all the html formatting, probably not needed because all the information looks like it's already here
-    Source: https://realpython.com/beautiful-soup-web-scraper-python/#scrape-the-fake-python-job-site
 
-    import requests
+    url_list = []
+    print("running extract_next_links")
 
-    URL = "https://realpython.github.io/fake-jobs/"
-    page = requests.get(URL)
+    #if(response.status >= 400):
+        # bad
 
-    print(page.text)
+    if(response.status != 200):
+        print(f"Error: {response.status}")
+        
+        
+    soup = BeautifulSoup(response.raw_response.content, "lxml")
 
-    response.raw_response.content
-
-    '''
-    
+    #soup = BeautifulSoup(html_doc, 'html.parser')
+    #print(soup.prettify())
 
 
-    return list()
+        
+
+    for link in soup.find_all('a'):
+        # might want to check validity of the link
+        if is_valid(link.get('href')):
+            #print(link.get('href'))
+            url_list.append(link.get('href'))
+    # NEED TO GET EVERYTHING IN THE FORMAAT <href="somestring">
+
+
+    return url_list
 
 def is_valid(url):
+
     # Decide whether to crawl this url or not. 
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
         parsed = urlparse(url)
-        if parsed.scheme not in set(["http", "https"]) or parsed.hostname not in set(['ics.uci.edu', 'cs.uci.edu', 'informatics.uci.edu', 'stat.uci.edu']):
+        
+
+        # Check for http protocol 
+        if parsed.scheme not in set(["http", "https"]):
             return False
+
+        # Checking if school website        
+        #print("netloc: ", parsed.netloc)
+        
+
+
+        # quality code that checks if a website is good
+        #if parsed.netloc not in set(["ics.uci.edu", ])
+        
+        if "ics.uci.edu" not in parsed.netloc and "cs.uci.edu" not in parsed.netloc and "informatics.uci.edu" not in parsed.netloc and "stat.uci.edu" not in parsed.netloc:
+            print("not valid:",parsed.netloc)
+            return False
+
+        # print(parsed.netloc)    
+        #if not re.match(r'(ics.uci.edu|cs.uci.edu|informatics.uci.edu|stat.uci.edu)', parsed.netloc):
+        # if parsed.netloc not in set(['ics.uci.edu', 'cs.uci.edu', 'informatics.uci.edu', 'stat.uci.edu']):
+        
+            #return False
+ 
+        '''
+        Some notable netlocs
+
+        netloc:  mhcid.ics.uci.edu
+        netloc:  mse.ics.uci.edu
+        netloc:  www.facebook.com
+        netloc:  twitter.com
+        netloc:  uci.edu
+        netloc:  recruit.ap.uci.edu
+        netloc: intranet.ics.uci.edu
+        '''
+
+        
         return not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
