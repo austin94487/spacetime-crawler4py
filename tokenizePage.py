@@ -34,7 +34,7 @@ def tokenize(someSoup):
 
 
 
-        for word in paragraphAsString.split(' '):
+        for word in paragraphAsString.split():
             
             # StopWords is an object, it has a stop_words attribute
 
@@ -51,13 +51,11 @@ def tokenize(someSoup):
 
 
 def count50(tokenDict):
-    
     # Print by descending order in terms of how many times they are counted
-    # for someTuple in sorted(tokenDict.items(), key=lambda x:x[1], reverse=True):
-    for someTuple in sorted(tokenDict.items()):
-        print(someTuple[0], "-", someTuple[1])
+    for key, value in sorted(tokenDict.items(), key=lambda x: -x[1])[0:50]:
+        print(key, "-", value)
     
-    return
+    return 
 
 
 # function to extract html document from given url
@@ -113,9 +111,9 @@ if __name__ == "__main__":
         print("sum(map2): ", sum(map2[key] for key in map2.keys()))
         print("sum(totalMap): ", sum(totalMap[key] for key in totalMap.keys()))
 
-        for k, v in sorted(totalMap.items(), key=lambda item: -item[1])[0:50]:
-            print(k, " - ", v)
-    
+        #for k, v in sorted(totalMap.items(), key=lambda item: -item[1])[0:50]:
+        #    print(k, " - ", v)
+        count50(totalMap)
 
 
         # res = dict(sorted(totalMap.items(), key = lambda x: x[1], reverse = True)[:50])

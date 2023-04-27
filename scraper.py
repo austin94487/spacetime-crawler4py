@@ -1,7 +1,7 @@
 import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
-from crawler.URLStore import URLStore
+from crawler.urlstore import URLStore
 
 # The scraper function receives a URL and corresponding Web response 
 # (for example, the first one will be "http://www.ics.uci.edu" and 
@@ -118,7 +118,7 @@ def is_valid(url):
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower()):
             return False
 
-       URLStore.unique_urls.add(parsed.netloc) 
+        URLStore.unique_urls.add(parsed.netloc) 
 
 
 
