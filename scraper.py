@@ -1,6 +1,7 @@
 import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
+from crawler.URLStore import URLStore
 
 # The scraper function receives a URL and corresponding Web response 
 # (for example, the first one will be "http://www.ics.uci.edu" and 
@@ -17,7 +18,6 @@ from bs4 import BeautifulSoup
 def scraper(url, response):
     links = extract_next_links(url, response)
     url_list = [link for link in links if is_valid(link)]
-    # print(url_list)
     return url_list
 
 
@@ -38,16 +38,17 @@ def extract_next_links(url, response):
     url_list = []
     print("running extract_next_links")
 
-    #if(response.status >= 400):
-        # bad
-
-    if(response.status != 200):
+    if (response.status != 200) or (url in URLStore.scraped):
         print(f"Error: {response.status}")
+        # empty return
+        return []
         
         
+
     soup = BeautifulSoup(response.raw_response.content, "lxml")
 
-    #soup = BeautifulSoup(html_doc, 'html.parser')
+    
+    #soup = BeautifulSoup(response.raw_response.content, 'html.parser')
     #print(soup.prettify())
 
 
@@ -55,12 +56,14 @@ def extract_next_links(url, response):
 
     for link in soup.find_all('a'):
         # might want to check validity of the link
-        if is_valid(link.get('href')):
+        href_link = link.get('href')
+        if is_valid(href_link):
             #print(link.get('href'))
-            url_list.append(link.get('href'))
+            url_list.append(href_link)
     # NEED TO GET EVERYTHING IN THE FORMAAT <href="somestring">
 
-
+    # tofix?
+    URLStore.scraped.add(url)
     return url_list
 
 def is_valid(url):
@@ -79,13 +82,11 @@ def is_valid(url):
         # Checking if school website        
         #print("netloc: ", parsed.netloc)
         
-
-
         # quality code that checks if a website is good
         #if parsed.netloc not in set(["ics.uci.edu", ])
         
         if "ics.uci.edu" not in parsed.netloc and "cs.uci.edu" not in parsed.netloc and "informatics.uci.edu" not in parsed.netloc and "stat.uci.edu" not in parsed.netloc:
-            print("not valid:",parsed.netloc)
+            # print("not valid:", parsed.netloc)
             return False
 
         # print(parsed.netloc)    
@@ -103,11 +104,10 @@ def is_valid(url):
         netloc:  twitter.com
         netloc:  uci.edu
         netloc:  recruit.ap.uci.edu
-        netloc: intranet.ics.uci.edu
-        '''
+        netloc:  intranet.ics.uci.edu
+        ''' 
 
-        
-        return not re.match(
+        if re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
             + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
@@ -115,7 +115,12 @@ def is_valid(url):
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
+            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower()):
+            return False
+
+       URLStore.unique_urls.add(parsed.netloc) 
+
+
 
     except TypeError:
         print ("TypeError for ", parsed)

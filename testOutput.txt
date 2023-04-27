@@ -1,0 +1,56 @@
+len(map1):  1350
+len(map2):  393
+len(totalMap):  1510
+sum(map1):  11442
+sum(map2):  7721
+sum(totalMap):  19163
+the  -  1032
+soup  -  518
+beautiful  -  508
+  -  462
+to  -  453
+you  -  429
+of  -  408
+and  -  291
+it  -  289
+is  -  282
+in  -  276
+tag  -  233
+that  -  186
+can  -  180
+on  -  163
+if  -  162
+python  -  162
+document  -  160
+or  -  158
+for  -  158
+as  -  147
+3  -  143
+find  -  129
+this  -  122
+all  -  121
+but  -  109
+beautifulsoup  -  109
+string  -  104
+html  -  92
+uses  -  92
+4  -  82
+an  -  81
+with  -  80
+use  -  75
+your  -  74
+like  -  73
+one  -  73
+will  -  72
+was  -  70
+parser  -  69
+tree  -  69
+be  -  68
+these  -  67
+by  -  66
+2  -  66
+tags  -  65
+are  -  64
+projects  -  62
+not  -  61
+into  -  60
