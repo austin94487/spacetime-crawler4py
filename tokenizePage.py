@@ -9,9 +9,7 @@ from utils.stopwords import StopWords
 
 
 
-def tokenize(someSoup):
-    
-    word_map = {}
+def tokenize(someSoup, word_map):
 
     # similar to a for links, p is used in html for paragraphs
     for paragraph in someSoup.find_all('p'):
@@ -34,7 +32,7 @@ def tokenize(someSoup):
 
 
 
-        for word in paragraphAsString.split(' '):
+        for word in paragraphAsString.split():
             
             # StopWords is an object, it has a stop_words attribute
 
@@ -46,18 +44,15 @@ def tokenize(someSoup):
 
                 word_map[word] = word_map.get(word, 0) + 1
 
-    return word_map
 
 
 
 def count50(tokenDict):
-    
     # Print by descending order in terms of how many times they are counted
-    # for someTuple in sorted(tokenDict.items(), key=lambda x:x[1], reverse=True):
-    for someTuple in sorted(tokenDict.items()):
-        print(someTuple[0], "-", someTuple[1])
+    for key, value in sorted(tokenDict.items(), key=lambda x: -x[1])[0:50]:
+        print(key, "-", value)
     
-    return
+    return 
 
 
 # function to extract html document from given url
@@ -88,34 +83,28 @@ if __name__ == "__main__":
     
     totalMap = {}
     try:
-        map1 = tokenize(soup1)
-        map2 = tokenize(soup2)
+        word_map = {}
+        tokenize(soup1, word_map)
+        tokenize(soup2, word_map)
         
-        totalKeys = set(map1.keys())
-        totalKeys.update(set(map2.keys()))
+        totalKeys = set(word_map.keys())
         
         
         '''
 
         '''
-
-        for key in totalKeys:
-            # gets value from both maps, add together
-            # if not present in one particular map, returns value for the initial map
-            totalMap[key] = map1.get(key, 0) + map2.get(key, 0)
-
         
+   
+        #print("len(map1): ", len(map1))
+        #print("len(map2): ", len(map2))
+        #print("len(totalMap): ", len(totalMap))
+        #print("sum(map1): ", sum(map1[key] for key in map1.keys()))
+        #print("sum(map2): ", sum(map2[key] for key in map2.keys()))
+        #print("sum(totalMap): ", sum(totalMap[key] for key in totalMap.keys()))
 
-        print("len(map1): ", len(map1))
-        print("len(map2): ", len(map2))
-        print("len(totalMap): ", len(totalMap))
-        print("sum(map1): ", sum(map1[key] for key in map1.keys()))
-        print("sum(map2): ", sum(map2[key] for key in map2.keys()))
-        print("sum(totalMap): ", sum(totalMap[key] for key in totalMap.keys()))
-
-        for k, v in sorted(totalMap.items(), key=lambda item: -item[1])[0:50]:
-            print(k, " - ", v)
-    
+        #for k, v in sorted(totalMap.items(), key=lambda item: -item[1])[0:50]:
+        #    print(k, " - ", v)
+        count50(word_map)
 
 
         # res = dict(sorted(totalMap.items(), key = lambda x: x[1], reverse = True)[:50])
@@ -123,10 +112,11 @@ if __name__ == "__main__":
         # printing result
         # print("The top N value pairs are  " + str(res))
 
-    
+
     except Exception as e:
         print("Error occured in tokenize")
         print("Error message:\n", str(e))
+        
 
     
     #print("Raw text:\n",soup.get_text())

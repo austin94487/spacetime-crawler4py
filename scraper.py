@@ -1,7 +1,8 @@
 import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
-from crawler.URLStore import URLStore
+from crawler.urlstore import URLStore
+from utils.stopwords import StopWords
 
 # The scraper function receives a URL and corresponding Web response 
 # (for example, the first one will be "http://www.ics.uci.edu" and 
@@ -51,9 +52,6 @@ def extract_next_links(url, response):
     #soup = BeautifulSoup(response.raw_response.content, 'html.parser')
     #print(soup.prettify())
 
-
-        
-
     for link in soup.find_all('a'):
         # might want to check validity of the link
         href_link = link.get('href')
@@ -82,8 +80,6 @@ def is_valid(url):
         # Checking if school website        
         #print("netloc: ", parsed.netloc)
         
-        # quality code that checks if a website is good
-        #if parsed.netloc not in set(["ics.uci.edu", ])
         
         if "ics.uci.edu" not in parsed.netloc and "cs.uci.edu" not in parsed.netloc and "informatics.uci.edu" not in parsed.netloc and "stat.uci.edu" not in parsed.netloc:
             # print("not valid:", parsed.netloc)
@@ -118,7 +114,9 @@ def is_valid(url):
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower()):
             return False
 
-       URLStore.unique_urls.add(parsed.netloc) 
+        if parsed.netloc not in URLStore.unique_urls: 
+            URLStore.unique_urls.add(parsed.netloc) 
+        return True
 
 
 
@@ -126,4 +124,4 @@ def is_valid(url):
         print ("TypeError for ", parsed)
 
 
-        raise
+        return False
