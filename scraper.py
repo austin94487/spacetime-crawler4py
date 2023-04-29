@@ -39,7 +39,7 @@ def extract_next_links(url, response):
     url_list = []
     print("running extract_next_links")
 
-    url = href_link.partition("#")[0] # checks for a fragment and strips it from the url. Placed before checking for duplicates so we don't include the fragment. 
+    url = url.partition("#")[0] # checks for a fragment and strips it from the url. Placed before checking for duplicates so we don't include the fragment. 
 
     if (response.status != 200) or (url in URLStore.scraped):
         print(f"Error: {response.status}")
