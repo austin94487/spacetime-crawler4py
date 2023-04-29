@@ -1,8 +1,9 @@
 import re
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
-from crawler.urlstore import URLStore
+from crawler.database import Database
 from utils.stopwords import StopWords
+import tokenizePage
 
 # The scraper function receives a URL and corresponding Web response 
 # (for example, the first one will be "http://www.ics.uci.edu" and 
@@ -19,12 +20,14 @@ from utils.stopwords import StopWords
 def scraper(url, response):
     links = extract_next_links(url, response)
     url_list = [link for link in links if is_valid(link)]
+    tokenize_url_list(url_list)
     return url_list
 
+def tokenize_url_list(url_list):
+    for url in url_list:
+        tokenizePage.tokenize(url, Database.total_map)
 
 def extract_next_links(url, response):
-
-
     # Implementation required.
     # url: the URL that was used to get the page
     # response.url: the actual url of the page
@@ -34,76 +37,48 @@ def extract_next_links(url, response):
     #         response.raw_response.url: the url, again
     #         response.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from response.raw_response.content
-
-
     url_list = []
-    print("running extract_next_links")
-
     url = url.partition("#")[0] # checks for a fragment and strips it from the url. Placed before checking for duplicates so we don't include the fragment. 
 
-    if (response.status != 200) or (url in URLStore.scraped):
+    if (response.status != 200) or (url in Database.scraped):
         print(f"Error: {response.status}")
         # empty return
         return []
         
-        
-
     soup = BeautifulSoup(response.raw_response.content, "lxml")
-
-    
-    #soup = BeautifulSoup(response.raw_response.content, 'html.parser')
-    #print(soup.prettify())
 
     for link in soup.find_all('a'):
         # might want to check validity of the link
         href_link = link.get('href')
         if is_valid(href_link):
-            #print(link.get('href'))
             url_list.append(href_link)
-    # NEED TO GET EVERYTHING IN THE FORMAAT <href="somestring">
 
-    # tofix?
-    URLStore.scraped.add(url)
+    Database.scraped.add(url)
+    # print(url)
+    parsed = urlparse(url)
+    #if parsed.netloc not in Database.unique_urls:
+        # scrape robots.txt ()
+        # Disallowed ? add it to the blacklist
+        # add to unique urls
+    Database.unique_urls.add(parsed.netloc)
     return url_list
 
 def is_valid(url):
-
     # Decide whether to crawl this url or not. 
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
         parsed = urlparse(url)
-        
-
         # Check for http protocol 
         if parsed.scheme not in set(["http", "https"]):
             return False
 
         # Checking if school website        
-        #print("netloc: ", parsed.netloc)
-        
-        
         if "ics.uci.edu" not in parsed.netloc and "cs.uci.edu" not in parsed.netloc and "informatics.uci.edu" not in parsed.netloc and "stat.uci.edu" not in parsed.netloc:
-            # print("not valid:", parsed.netloc)
-            return False
+           return False
 
-        # print(parsed.netloc)    
-        #if not re.match(r'(ics.uci.edu|cs.uci.edu|informatics.uci.edu|stat.uci.edu)', parsed.netloc):
-        # if parsed.netloc not in set(['ics.uci.edu', 'cs.uci.edu', 'informatics.uci.edu', 'stat.uci.edu']):
-        
-            #return False
- 
-        '''
-        Some notable netlocs
-
-        netloc:  mhcid.ics.uci.edu
-        netloc:  mse.ics.uci.edu
-        netloc:  www.facebook.com
-        netloc:  twitter.com
-        netloc:  uci.edu
-        netloc:  recruit.ap.uci.edu
-        netloc:  intranet.ics.uci.edu
-        ''' 
+        #if "stat.uci.edu" not in parsed.netloc:
+        #    return False
 
         if re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
@@ -112,18 +87,12 @@ def is_valid(url):
             + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
             + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
             + r"|epub|dll|cnf|tgz|sha1"
-            + r"|thmx|mso|arff|rtf|jar|csv"
+            + r"|thmx|mso|arff|rtf|jar|csv|r"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower()):
             return False
-
-        if parsed.netloc not in URLStore.unique_urls: 
-            URLStore.unique_urls.add(parsed.netloc) 
+        
         return True
-
-
-
+        
     except TypeError:
         print ("TypeError for ", parsed)
-
-
         return False

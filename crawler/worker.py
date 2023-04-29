@@ -5,6 +5,8 @@ from utils.download import download
 from utils import get_logger
 import scraper
 import time
+from crawler.database import Database
+
 
 
 class Worker(Thread):
@@ -32,3 +34,12 @@ class Worker(Thread):
                 self.frontier.add_url(scraped_url)
             self.frontier.mark_url_complete(tbd_url)
             time.sleep(self.config.time_delay)
+        
+        print("TOP 50 WORDS")
+        for key, value in sorted(Database.total_map.items(), key=lambda x: -x[1])[0:50]:
+            print(key, "-", value)
+        print("UNIQUE NETLOCS")
+        for netloc in Database.unique_urls:
+            print(netloc)
+        
+        print("Total Map Size: ", len(Database.total_map))
