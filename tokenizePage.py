@@ -5,15 +5,16 @@ import json
 # from utils.s import StopWords
 from utils.stopwords import StopWords
 import time
+from crawler.database import Database
 
 # def tokenize(someSoup, word_map):
-def tokenize(url, word_map):
+def tokenize(url, soup, word_map):
     #start_time = time.time()
-    html_url = getHTMLdocument(url)
+    #html_url = getHTMLdocument(url)
     #end_time = time.time()
     #print("Time taken: ", end_time-start_time)
 
-    soup = BeautifulSoup(html_url, 'lxml')
+    #soup = BeautifulSoup(html_url, 'lxml')
 
     # similar to a for links, p is used in html for paragraphs
     for paragraph in soup.find_all('p'):
@@ -30,8 +31,10 @@ def tokenize(url, word_map):
         #for character in paragraphAsString:
         #    if(ord(character) > 127 or ord(character) < 0):
         #        paragraphAsString = paragraphAsString.replace(character, "")
-
-        for word in paragraphAsString.split():
+        wordList = paragraphAsString.split()
+        if len(wordList) > Database.longest_page[1]:
+            Database.longest_page = (url, len(wordList))
+        for word in wordList:
             # StopWords is an object, it has a stop_words attribute
             # TODO: Stopwords are making it into the output file, the word "the" is supposably part of the stopwords, and appears as the most commonly used word
             if word not in StopWords.stop_words:

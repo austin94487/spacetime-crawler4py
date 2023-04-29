@@ -20,7 +20,7 @@ import tokenizePage
 def scraper(url, response):
     links = extract_next_links(url, response)
     url_list = [link for link in links if is_valid(link)]
-    tokenize_url_list(url_list)
+    #tokenize_url_list(url_list)
     return url_list
 
 def tokenize_url_list(url_list):
@@ -52,7 +52,7 @@ def extract_next_links(url, response):
         href_link = link.get('href')
         if is_valid(href_link):
             url_list.append(href_link)
-
+    tokenizePage.tokenize(url, soup, Database.total_map)
     Database.scraped.add(url)
     # print(url)
     parsed = urlparse(url)
