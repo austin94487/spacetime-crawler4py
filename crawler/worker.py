@@ -43,3 +43,4 @@ class Worker(Thread):
             print(netloc)
         
         print("Total Map Size: ", len(Database.total_map))
+        print("Total Unique URLS:" len(Database.scraped))
