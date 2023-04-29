@@ -2,6 +2,7 @@ class Database:
     unique_urls = set()
     scraped = set()
     total_map = {}
+    longest_page = ("", 0) # string is a URL, 0 is total words.
 
 def __init__(self):
     self.unique_urls = set()
