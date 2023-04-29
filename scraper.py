@@ -17,15 +17,12 @@ import tokenizePage
 # resp:
 # This is the response given by the caching server for the requested URL. The response is an object of type Response (see utils/response.py)
 
+
 def scraper(url, response):
     links = extract_next_links(url, response)
     url_list = [link for link in links if is_valid(link)]
-    #tokenize_url_list(url_list)
     return url_list
 
-def tokenize_url_list(url_list):
-    for url in url_list:
-        tokenizePage.tokenize(url, Database.total_map)
 
 def extract_next_links(url, response):
     # Implementation required.
@@ -38,11 +35,10 @@ def extract_next_links(url, response):
     #         response.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from response.raw_response.content
     url_list = []
-    url = url.partition("#")[0] # checks for a fragment and strips it from the url. Placed before checking for duplicates so we don't include the fragment. 
+    url = url.partition("#")[0]  # checks for a fragment and strips it from the url. Placed before checking for duplicates so we don't include the fragment. 
 
     if (response.status != 200) or (url in Database.scraped):
         print(f"Error: {response.status}")
-        # empty return
         return []
         
     soup = BeautifulSoup(response.raw_response.content, "lxml")
@@ -52,16 +48,16 @@ def extract_next_links(url, response):
         href_link = link.get('href')
         if is_valid(href_link):
             url_list.append(href_link)
+            
     tokenizePage.tokenize(url, soup, Database.total_map)
     Database.scraped.add(url)
-    # print(url)
+    
     parsed = urlparse(url)
-    #if parsed.netloc not in Database.unique_urls:
-        # scrape robots.txt ()
-        # Disallowed ? add it to the blacklist
-        # add to unique urls
+    
+    # Database.unique_urls IS A SET, no need to check for uniqueness
     Database.unique_urls.add(parsed.netloc)
     return url_list
+
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
@@ -77,18 +73,15 @@ def is_valid(url):
         if "ics.uci.edu" not in parsed.netloc and "cs.uci.edu" not in parsed.netloc and "informatics.uci.edu" not in parsed.netloc and "stat.uci.edu" not in parsed.netloc:
            return False
 
-        #if "stat.uci.edu" not in parsed.netloc:
-        #    return False
-
         if re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
-            + r"|png|tiff?|mid|mp2|mp3|mp4"
-            + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
-            + r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
-            + r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
-            + r"|epub|dll|cnf|tgz|sha1"
-            + r"|thmx|mso|arff|rtf|jar|csv|r"
-            + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower()):
+            +r"|png|tiff?|mid|mp2|mp3|mp4"
+            +r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
+            +r"|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names"
+            +r"|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso"
+            +r"|epub|dll|cnf|tgz|sha1"
+            +r"|thmx|mso|arff|rtf|jar|csv|r"
+            +r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower()):
             return False
         
         return True

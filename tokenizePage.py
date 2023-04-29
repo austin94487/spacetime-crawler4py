@@ -6,58 +6,65 @@ import json
 from utils.stopwords import StopWords
 import time
 from crawler.database import Database
+from unidecode import unidecode
+
 
 # def tokenize(someSoup, word_map):
 def tokenize(url, soup, word_map):
-    #start_time = time.time()
-    #html_url = getHTMLdocument(url)
-    #end_time = time.time()
-    #print("Time taken: ", end_time-start_time)
-
-    #soup = BeautifulSoup(html_url, 'lxml')
 
     # similar to a for links, p is used in html for paragraphs
     for paragraph in soup.find_all('p'):
-        paragraphAsString = paragraph.get_text() # obtain text from paragraphs on webpage
-        #for word in p.split(' '):
+        paragraphAsString = paragraph.get_text()  # obtain text from paragraphs on webpage
 
-        #remove punc, replaces with a space
+        # remove punc, replaces with a space
         paragraphAsString = re.sub('[\W_]+', ' ', paragraphAsString)
 
-        #lowercase
+        # lowercase
         paragraphAsString = paragraphAsString.lower()
 
-        #remove nonenglish, nonnumberic
-        #for character in paragraphAsString:
+        # Remove nonenglish, nonnumberic
+        # for character in paragraphAsString:
         #    if(ord(character) > 127 or ord(character) < 0):
         #        paragraphAsString = paragraphAsString.replace(character, "")
+
+        # Default splits by whitespace
         wordList = paragraphAsString.split()
-        if len(wordList) > Database.longest_page[1]:
-            Database.longest_page = (url, len(wordList))
+        
+        # Potentially update longest page
+        pageLength = len(wordList)
+        if pageLength > Database.longest_page[1]:
+            Database.longest_page = (url, pageLength)
+            
         for word in wordList:
-            # StopWords is an object, it has a stop_words attribute
-            # TODO: Stopwords are making it into the output file, the word "the" is supposably part of the stopwords, and appears as the most commonly used word
-            if word not in StopWords.stop_words:
+            
+            # Decodes characters into English as best as it can
+            decodedWord = unidecode(word)
+            
+            if decodedWord not in StopWords.stop_words:
+                
+                # 105 and 97 are the ord for "i" and "a", the only single letter words in English
+                if len(decodedWord) > 1 and ord(decodedWord) != 105 and ord(decodedWord) != 97 or decodedWord.isnumeric():
+                    word_map[decodedWord] = word_map.get(decodedWord, 0) + 1
+                
                 # word_map.get(word, 0) returns 0 if key does not exist in the dictionary already
                 # https://stackoverflow.com/questions/6130768/return-a-default-value-if-a-dictionary-key-is-not-available for more explanation
-                word_map[word] = word_map.get(word, 0) + 1
+
 
 def count50(tokenDict):
     # Print by descending order in terms of how many times they are counted
-    for key, value in sorted(tokenDict.items(), key=lambda x: -x[1])[0:50]:
+    for key, value in sorted(tokenDict.items(), key=lambda x:-x[1])[0:50]:
         print(key, "-", value)
     
     return 
 
+
 # function to extract html document from given url
 def getHTMLdocument(url):
-    # request for HTML document of given url
-    # start_time = time.time()
+
     response = requests.get(url)
-    # end_time = time.time()
-    # print("Time taken: ", end_time-start_time)
-    # response will be provided in JSON format
+
     return response.text
+
 
 if __name__ == "__main__":
 
@@ -75,11 +82,10 @@ if __name__ == "__main__":
     totalMap = {}
     try:
         word_map = {}
-        tokenize(soup1, word_map)
-        tokenize(soup2, word_map)
+        tokenize(url1, soup1, word_map)
+        tokenize(url2, soup2, word_map)
         totalKeys = set(word_map.keys())
         count50(word_map)
-
 
     except Exception as e:
         print("Error occured in tokenize")
