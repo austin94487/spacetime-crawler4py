@@ -24,3 +24,25 @@ class Crawler(object):
     def join(self):
         for worker in self.workers:
             worker.join()
+
+
+
+
+
+
+
+'''
+# 1. Import the library
+import concurrent.futures
+
+# 2. Define the function
+def our_function(data):
+	# Fill with code
+
+# 3. Run the multithreading (You can apply any number of max worker)
+with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+	executor.map(our_function, list_of_data)
+
+
+'''
+

@@ -21,6 +21,8 @@ class Worker(Thread):
         
     def run(self):
         data = Database()
+
+        # multithread here?
         while True:
             tbd_url = self.frontier.get_tbd_url()
             if not tbd_url:
@@ -31,13 +33,19 @@ class Worker(Thread):
                 f"Downloaded {tbd_url}, status <{resp.status}>, "
                 f"using cache {self.config.cache_server}.")
             
-
+            # potentially multithreading goes here
+            # idea: there are 4 threads, each for a domain. we put politeness for each
+            # best case, each thread has equal number of work to do
+            # worst case, it's all one domain
+            # no good idea atm to address this
+            
             scraped_urls = scraper.scraper(tbd_url, resp)
             for scraped_url in scraped_urls:
                 self.frontier.add_url(scraped_url)
             self.frontier.mark_url_complete(tbd_url)
             time.sleep(self.config.time_delay)
-        
+
+
         print("TOP 50 WORDS")
         for key, value in sorted(data.total_map.items(), key=lambda x: -x[1])[0:50]:
             print(key, "-", value)
