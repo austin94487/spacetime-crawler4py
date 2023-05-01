@@ -48,14 +48,17 @@ def extract_next_links(url, response):
         href_link = link.get('href')
         if is_valid(href_link):
             url_list.append(href_link)
-            
-    tokenizePage.tokenize(url, soup, Database.total_map)
-    Database.scraped.add(url)
-    
-    parsed = urlparse(url)
-    
-    # Database.unique_urls IS A SET, no need to check for uniqueness
-    Database.unique_urls.add(parsed.netloc)
+
+
+    # Decided arbitarily 0 is small enough
+    if len(url_list) > 0:
+        tokenizePage.tokenize(url, soup, Database.total_map)
+        Database.scraped.add(url)
+        parsed = urlparse(url)
+        Database.unique_urls.add(parsed.netloc)
+    #elif len(url_list) == 0:
+    #    print("we are running123 xd")
+    #    print(url)
     return url_list
 
 
