@@ -43,6 +43,7 @@ def extract_next_links(url, response):
         # detect redirects, add new url to url_list to be scraped
         if response.status >= 300 and response.status < 400 and response.raw_response.url != response.url: # is it within the redirect output? is it actually redirecting?
             if(is_valid(response.raw_response.url)):
+                print("ORIGINAL URL: ", response.raw_response.url, "REDIRECTED URL: ", response.url)
                 url_list.append(response.raw_response.url) 
                 Database.redirects_links += 1
             else:

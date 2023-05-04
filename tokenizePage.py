@@ -40,9 +40,10 @@ def tokenize(url, soup, word_map):
             # "t" is not
 
 
-            if len(decodedWord) > 1:
+            wordLength = len(decodedWord)
+            if wordLength > 1:
                 word_map[decodedWord] = word_map.get(decodedWord, 0) + 1
-            else:
+            elif wordLength == 1:
                 # 105 and 97 are the ord for "i" and "a", the only single letter words in English
                 if ord(decodedWord) != 105 and ord(decodedWord) != 97 or decodedWord.isnumeric():
                     word_map[decodedWord] = word_map.get(decodedWord, 0) + 1
