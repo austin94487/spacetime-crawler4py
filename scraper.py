@@ -42,6 +42,10 @@ def extract_next_links(url, response):
         return []
         
     soup = BeautifulSoup(response.raw_response.content, "lxml")
+    
+    if (len(soup.find_all("a")) == 0) {
+        # no links on page
+    }
 
     for link in soup.find_all('a'):
         # might want to check validity of the link
