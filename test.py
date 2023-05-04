@@ -34,3 +34,5 @@ soup = BeautifulSoup(html_doc, 'lxml')
 # getting their length
 for tag in soup.findAll(True):
     print(tag.name, " : ", len(soup.find(tag.name).text))
+
+print(soup.findAll("a"))
