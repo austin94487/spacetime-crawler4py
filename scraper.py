@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 from crawler.database import Database
 from utils.stopwords import StopWords
 import tokenizePage
-import requests
 
 # The scraper function receives a URL and corresponding Web response 
 # (for example, the first one will be "http://www.ics.uci.edu" and 
@@ -38,8 +37,6 @@ def extract_next_links(url, response):
     url_list = []
     url = url.partition("#")[0]  # checks for a fragment and strips it from the url. Placed before checking for duplicates so we don't include the fragment. 
 
-   
-    print("1 ERROR CHECK ENL", url)
     if (response.status != 200) or (url in Database.scraped):
         # detect redirects, add new url to url_list to be scraped
         if response.status >= 300 and response.status < 400 and response.raw_response.url != response.url: 
@@ -50,7 +47,6 @@ def extract_next_links(url, response):
         
     soup = BeautifulSoup(response.raw_response.content, "lxml")
     
-    print("2 ERROR CHECK ENL", url)
     # detect and avoid dead urls that return 200 status but no data 
     if (len(soup.find_all("a")) == 0 and len(soup.find_all("body")) < 100): 
         # no links on page and low information = dead page
@@ -62,7 +58,6 @@ def extract_next_links(url, response):
         href_link = link.get('href')
         url_list.append(href_link)
 
-    print("3 ERROR CHECK ENL", url)
 
     # Decided arbitarily 0 is small enough
     if len(url_list) > 0:
@@ -114,9 +109,7 @@ def is_valid(url):
 
             Database.url_to_subdomain[httpWithNetloc] = tempURL
          
-        print("3 ERROR CHECK", url)
         return True
         
     except TypeError:
-        print ("TypeError for ", parsed)
         return False
