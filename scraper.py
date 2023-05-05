@@ -74,14 +74,25 @@ def is_valid(url):
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
+        # did we scrape it already? we dont need to crawl it again.
+        if url in Database.scraped:
+            return False
+        
         parsed = urlparse(url)
         # Check for http protocol 
         if parsed.scheme not in set(["http", "https"]):
             return False
+        
 
         # Checking if school website        
-        if "ics.uci.edu" not in parsed.netloc and "cs.uci.edu" not in parsed.netloc and "informatics.uci.edu" not in parsed.netloc and "stat.uci.edu" not in parsed.netloc:
-           return False
+        #if "ics.uci.edu" not in parsed.netloc and "cs.uci.edu" not in parsed.netloc and "informatics.uci.edu" not in parsed.netloc and "stat.uci.edu" not in parsed.netloc:
+        #   return False
+        
+        if parsed.netloc != "ics.uci.edu" and parsed.netloc != "cs.uci.edu" and parsed.netloc != "informatic.uci.edu" and parsed.netloc != "stat.uci.edu":
+            # first, check if its the base site. if it falls into any one of the base subdomains, it moves on. 
+            if ".ics.uci.edu" not in parsed.netloc and ".cs.uci.edu" not in parsed.netloc and ".informatics.uci.edu" not in parsed.netloc and ".stat.uci.edu" not in parsed.netloc:
+                # filters out econimics.uci.edu by including the .
+                return False
 
         if re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
@@ -99,15 +110,15 @@ def is_valid(url):
         if re.match(r"^.*?(\/.+?\/).*?\1.*$|^.*?\/(.+?\/)\2.*$", parsed.path.lower()):
             return False
 
-        
-        if "ics.uci.edu" in parsed.netloc and "ics.uci.edu" != parsed.netloc:
-            httpWithNetloc = parsed.scheme + "://" + parsed.netloc
-            Database.subdomains[httpWithNetloc] = Database.subdomains.get(parsed.scheme + "://" + parsed.netloc, 0) + 1
-            
-            tempURL = parsed.netloc
-            tempURL = tempURL.replace("www.","")
 
-            Database.url_to_subdomain[httpWithNetloc] = tempURL
+        #if "ics.uci.edu" in parsed.netloc and "ics.uci.edu" != parsed.netloc:
+        httpWithNetloc = parsed.scheme + "://" + parsed.netloc
+        Database.subdomains[httpWithNetloc] = Database.subdomains.get(parsed.scheme + "://" + parsed.netloc, 0) + 1
+        
+        tempURL = parsed.netloc
+        tempURL = tempURL.replace("www.","")
+
+        Database.url_to_subdomain[httpWithNetloc] = tempURL
          
         return True
         
