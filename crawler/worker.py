@@ -45,6 +45,7 @@ class Worker(Thread):
             time.sleep(self.config.time_delay)
 
 
+        print("worker")
         print("TOP 50 WORDS")
         for key, value in sorted(data.total_map.items(), key=lambda x: -x[1])[0:50]:
             print(key, "-", value)
@@ -55,3 +56,7 @@ class Worker(Thread):
         print("Total Map Size: ", len(data.total_map))
         print("Total Unique URLS:", len(data.scraped))
         print("Longest page: ", data.longest_page)
+
+        print("Subdomains Ranked")
+        for key, value in sorted(Database.subdomains.items(), key=lambda x: Database.url_to_subdomain.get((x[0]))):
+            print(key + ",", str(value))

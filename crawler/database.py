@@ -6,6 +6,8 @@ class Database:
     dead_links = 0
     redirects_links = 0 
     subdomains = {}
+    url_to_subdomain = {}
+
 
 
 def __init__(self):
@@ -16,5 +18,6 @@ def __init__(self):
     self.dead_links = 0
     self.redirects_links = 0
     self.subdomains = {}
+    self.url_to_subdomain = {}
     # Should this be a static variable?
     # self.longest_page = ("", 0)

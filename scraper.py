@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from crawler.database import Database
 from utils.stopwords import StopWords
 import tokenizePage
+import requests
 
 # The scraper function receives a URL and corresponding Web response 
 # (for example, the first one will be "http://www.ics.uci.edu" and 
@@ -38,23 +39,20 @@ def extract_next_links(url, response):
     url = url.partition("#")[0]  # checks for a fragment and strips it from the url. Placed before checking for duplicates so we don't include the fragment. 
 
    
-
-    if (response.status != 200) or (url in Database.scraped) or (len(response.raw_response.content) > 10000):
+    print("1 ERROR CHECK ENL", url)
+    if (response.status != 200) or (url in Database.scraped):
         # detect redirects, add new url to url_list to be scraped
-        if response.status >= 300 and response.status < 400 and response.raw_response.url != response.url: # is it within the redirect output? is it actually redirecting?
-            if(is_valid(response.raw_response.url)):
-                print("ORIGINAL URL: ", response.raw_response.url, "REDIRECTED URL: ", response.url)
-                url_list.append(response.raw_response.url) 
-                Database.redirects_links += 1
-            else:
-                return []
+        if response.status >= 300 and response.status < 400 and response.raw_response.url != response.url: 
+            url_list.append(response.raw_response.url) 
+            Database.redirects_links += 1
         else:
             return []
         
     soup = BeautifulSoup(response.raw_response.content, "lxml")
     
+    print("2 ERROR CHECK ENL", url)
     # detect and avoid dead urls that return 200 status but no data 
-    if (len(soup.find_all("a")) == 0 and len(soup.find_all("body") < 100)): 
+    if (len(soup.find_all("a")) == 0 and len(soup.find_all("body")) < 100): 
         # no links on page and low information = dead page
         Database.dead_links += 1
         return []
@@ -62,9 +60,9 @@ def extract_next_links(url, response):
     for link in soup.find_all('a'): 
         # finding links and adding them to the list
         href_link = link.get('href')
-        if is_valid(href_link):
-            url_list.append(href_link)
+        url_list.append(href_link)
 
+    print("3 ERROR CHECK ENL", url)
 
     # Decided arbitarily 0 is small enough
     if len(url_list) > 0:
@@ -72,14 +70,7 @@ def extract_next_links(url, response):
         Database.scraped.add(url)
         parsed = urlparse(url)
         Database.unique_urls.add(parsed.netloc)
-        tempPath = parsed.path
-        if(tempPath.rindex("/") == len(parsed.path) - 1): # again, parsing to just the subdomain (if url is ics.uci.edu/one/two parsing gives us /one)
-            tempPath = parsed.path[:-1]
-        sd = tempPath[:tempPath.rindex("/")]
-        Database.subdomains[sd] = Database.subdomains.get(sd, 0) + 1
-    #elif len(url_list) == 0:
-    #    print("we are running123 xd")
-    #    print(url)
+
     return url_list
 
 
@@ -110,18 +101,20 @@ def is_valid(url):
 
         # Avoid links with repeating directories
         # https://support.archive-it.org/hc/en-us/articles/208332963-How-to-modify-your-crawl-scope-with-a-regular-expression
-        if re.match(r"^.*?(\/.+?\/).*?\1.*$|^.*?\/(.+?\/)\2.*$"):
+        if re.match(r"^.*?(\/.+?\/).*?\1.*$|^.*?\/(.+?\/)\2.*$", parsed.path.lower()):
             return False
 
-        # www.example.com/blah/blah/blah1
-        # www.example.com/blah/blah/blah2
-        # www.example.com/blah/blah/blah3
-        tempPath = parsed.path
-        if(tempPath.rindex("/") == len(parsed.path) - 1):
-            tempPath = parsed.path[:-1]
-        sd = tempPath[:tempPath.rindex("/")]
-        if(Database.subdomains.get(sd, 0) >= 5):
-            return False
+        
+        if "ics.uci.edu" in parsed.netloc and "ics.uci.edu" != parsed.netloc:
+            httpWithNetloc = parsed.scheme + "://" + parsed.netloc
+            Database.subdomains[httpWithNetloc] = Database.subdomains.get(parsed.scheme + "://" + parsed.netloc, 0) + 1
+            
+            tempURL = parsed.netloc
+            tempURL = tempURL.replace("www.","")
+
+            Database.url_to_subdomain[httpWithNetloc] = tempURL
+         
+        print("3 ERROR CHECK", url)
         return True
         
     except TypeError:
