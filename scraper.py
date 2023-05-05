@@ -111,14 +111,14 @@ def is_valid(url):
             return False
 
 
-        #if "ics.uci.edu" in parsed.netloc and "ics.uci.edu" != parsed.netloc:
-        httpWithNetloc = parsed.scheme + "://" + parsed.netloc
-        Database.subdomains[httpWithNetloc] = Database.subdomains.get(parsed.scheme + "://" + parsed.netloc, 0) + 1
-        
-        tempURL = parsed.netloc
-        tempURL = tempURL.replace("www.","")
+        if "ics.uci.edu" in parsed.netloc and "ics.uci.edu" != parsed.netloc:
+            httpWithNetloc = parsed.scheme + "://" + parsed.netloc
+            Database.subdomains[httpWithNetloc] = Database.subdomains.get(parsed.scheme + "://" + parsed.netloc, 0) + 1
+            
+            tempURL = parsed.netloc
+            tempURL = tempURL.replace("www.","")
 
-        Database.url_to_subdomain[httpWithNetloc] = tempURL
+            Database.url_to_subdomain[httpWithNetloc] = tempURL
          
         return True
         
